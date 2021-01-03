@@ -21,13 +21,13 @@ function [costVector]=parallelHybrid(t_vec,SOC_start,SOC_final);
 % Vehicle Data 
 H_l= 44.6e6; % Lower Heating Value [J/kg] 
 
-roh_l=732.2; % Fuel Density [Kg/m3]
+roh_petrol=732.2; % Fuel Density [Kg/m3]
 
-roh_a=1.18; % Air Density [kg/m3]
+roh_air=1.18; % Air Density [kg/m3]
 
 Je=0.2; % Engine Inertia [kgm2]
 
-T_engine_max= 115; % Engine Maximum Torque [Nm]
+T_ice_max= 115; % Engine Maximum Torque [Nm]
 
 V_disp=1.497e-3; % Engine Displacment [m3]
 
@@ -96,7 +96,7 @@ Gearratio(G_z(t_vec(1)) == 4) =4.2555; % 4th Gear ratio
 Gearratio(G_z(t_vec(1)) == 5) =3.2623; % 5th Gear ratio
 
 % Total Required or traction force at wheel
-Forcetraction = (0.5*roh_a*Af*cD.*(Average_speed_wheel.^2)) + (mv*g*cR) + ((mv+mwheel).*Average_accl_wheel); 
+Forcetraction = (0.5*roh_air*Af*cD.*(Average_speed_wheel.^2)) + (mv*g*cR) + ((mv+mwheel).*Average_accl_wheel); 
 
 % Torque of Wheel
 Torquewheel=Forcetraction*rw; 
@@ -128,7 +128,7 @@ costVector=(Angular_speed_engine/(e*H_l))*(Torqueengine+x+Je*(Angular_accl_engin
 
 
 % Additional Constraints
-costVector(Torqueengine>T_engine_max)=inf;
+costVector(Torqueengine>T_ice_max)=inf;
 costVector((Gearratio==0) & ((I_batt)==0))=0;
 costVector(Torqueelectric_machine<-T_em_max | Torqueelectric_machine>T_em_max)=Inf;
 costVector((abs(I_batt)>0) & (Gearratio==0))=inf;
