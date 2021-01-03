@@ -18,62 +18,60 @@ function [costVector]=parallelHybrid(t_vec,SOC_start,SOC_final);
  global V_z;
  global G_z;
 
-% Vehicle Data 
+ 
+%----------------------- Vehicle Data --------------------------%
+%% Fuel and Air Parameters
+
 H_l= 44.6e6; % Lower Heating Value [J/kg] 
-
 roh_petrol=732.2; % Fuel Density [Kg/m3]
-
 roh_air=1.18; % Air Density [kg/m3]
 
+%% Engine Configuration
+
 Je=0.2; % Engine Inertia [kgm2]
-
 T_ice_max= 115; % Engine Maximum Torque [Nm]
-
 V_disp=1.497e-3; % Engine Displacment [m3]
 
-e=0.4; % Willans approximation of engine efficiency
+%% Willans approximation of engine efficiency
 
+e=0.4; % Willans approximation of engine efficiency
 p_me0=0.1e6; % Willans approximation of engine pressure [MPa]
 
+%% Battery Configuration
+
 Q_o=6.5; % Battery charging capacity [Ah]
-
 Uoc=300; % Open circuit voltage [V]
-
 Imax= 200; % Maximum dis-/charging current [A]
-
 Imin=-200; % Maximum dis-/charging current [A]
-
 Ri= 0.65; % Inner resistance [ohm]
 
+%% Motor and Generator Configuration
+
 n_electricmachine=0.9; % Efficiency of electrical machine
-
-g=9.81; % Gravity
-
-cD=0.32; % Drag coefficient
-
-cR=0.015; % Rolling resistance coefficient
-
-Af=2.31; % Frontal area [m2]
-
-mv= 1500; % Vehicle mass [kg]
-
-rw=0.3; % Wheel radius [m]
-
-Jw=0.6; % Inertia of the wheels [kgm2]
-
-mwheel=Jw/(rw^2); % Rotating Mass [kg]
-
-eta_gearbox=0.98; % Efficiency of Transmission
-
 T_em_max=400; % Maximum Electric machine Torque [Nm]
-
 P_em_max=50; % Power of Electric Machine [kW]
-
 m_em=1.5; % Electric motor weight [kg/Kw]
 
+%% Logitudinal Vehicle Model Parameters
+
+g=9.81; % Gravity
+cD=0.32; % Drag coefficient
+cR=0.015; % Rolling resistance coefficient
+Af=2.31; % Frontal area [m2]
+mv= 1500; % Vehicle mass [kg]
+rw=0.3; % Wheel radius [m]
+Jw=0.6; % Inertia of the wheels [kgm2]
+mwheel=Jw/(rw^2); % Rotating Mass [kg]
+eta_gearbox=0.98; % Efficiency of Transmission
 P_pt_max=90.8; % Maximum powertrain power [kW]
 
+%% Range
+N_e= 0:800:5000; % Engine RPM range
+w_e= 300; % [rad/s2] % Maximum accelration of the engine
+
+
 %-----------------------Cost Vector Calculations--------------------------%
+%% Longitudinal Vehicle Dynamics
 
 % Average Velocity at Wheel
 Average_speed_wheel= mean(V_z(t_vec)); 
@@ -110,14 +108,20 @@ Angular_speed_engine=Angular_vspeed_wheel.*Gearratio;
 % Angular accleration of engine
 Angular_accl_engine=Angular_acc_wheel.*Gearratio; 
 
+%% Battery Model
+
 % Charging/ dischargning Current
 I_batt=-((SOC_final-SOC_start)*(Q_o*3600)); 
 
 % Power of Battery
 Powerbattery=(Uoc*I_batt)-(Ri*I_batt.^2); 
 
+%% Electric Machine Model
+
 % Torque of Electric Machine
 Torqueelectric_machine=(Powerbattery.*n_electricmachine.^sign(I_batt))./Angular_speed_engine;
+
+%% Engine Model
 
 % Torque of Engine
 Torqueengine=Torquegearbox-Torqueelectric_machine; 
@@ -126,8 +130,7 @@ Torqueengine=Torquegearbox-Torqueelectric_machine;
 x=((p_me0*V_disp)/(4*pi)); 
 costVector=(Angular_speed_engine/(e*H_l))*(Torqueengine+x+Je*(Angular_accl_engine)); 
 
-
-% Additional Constraints
+%% Additional Constraints
 costVector(Torqueengine>T_ice_max)=inf;
 costVector((Gearratio==0) & ((I_batt)==0))=0;
 costVector(Torqueelectric_machine<-T_em_max | Torqueelectric_machine>T_em_max)=Inf;
