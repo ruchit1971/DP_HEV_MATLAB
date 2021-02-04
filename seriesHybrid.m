@@ -22,15 +22,15 @@ function costVector=seriesHybrid(t_vec,SOC_start,SOC_final,Ne_start,Ne_final);
 %               The size of the returned cost-matrix should have the following
 %               size:  length(SOC_final) x length(Ne_final)
 
-% Matrix Creation 3D
+%% Matrix Creation 3D
 SOC_final=SOC_final';
 SOC_final=repmat(SOC_final,1,length(Ne_final));
 [b,demo]=size(SOC_final);
 Ne_final=repmat(Ne_final,b,1);
 
-% Global Variables
-global V_z;
-global T_z;
+%% Global Variables
+global V_z; % Velocity Gird
+global T_z; % Time Grid
 
 
 %----------------------- Vehicle Data --------------------------%
@@ -54,10 +54,10 @@ Imin=-200; % Maximum dis-/charging current [A]
 Ri= 0.65; % Inner resistance [ohm]
 
 %% Motor and Generator Configuration
-eta_motor=0.9; % Efficiency of electrical machine
-T_mech_max=400; %Nm
-Pmech_max=50000; % W
-Pmech_min=-50000; % W
+eta_motor=0.9; % Efficiency of Electrical Machine
+T_mech_max=400; % Maximum Torque of Electric Machine [Nm]
+Pmech_max=50000; % Maximum Power of Electric Machine [W]
+Pmech_min=-50000; % Minimum Power of Electric Machine [W]
   
 %% Logitudinal Vehicle Model Parameters
 cD=0.32; % Drag coefficient
