@@ -21,8 +21,6 @@ function costVector=seriesHybrid(t_vec,SOC_start,SOC_final,Ne_start,Ne_final);
 %  costMatrix - Matrix with the costs for all arcs from SOC_start. 
 %               The size of the returned cost-matrix should have the following
 %               size:  length(SOC_final) x length(Ne_final)
-  
-% Version 1.0,  2008-06-30 Lars Eriksson
 
 % Matrix Creation 3D
 SOC_final=SOC_final';
@@ -30,50 +28,42 @@ SOC_final=repmat(SOC_final,1,length(Ne_final));
 [b,demo]=size(SOC_final);
 Ne_final=repmat(Ne_final,b,1);
 
-% Global Variable
+% Global Variables
 global V_z;
 global T_z;
 
+
+%----------------------- Vehicle Data --------------------------%
+
+%% Fuel and Air Parameters
 H_l=44.6*1000000; % Lower Heating Value [J/kg] 
-
 roha_a=1.18; % Fuel Density [Kg/m3]
-
 J_e=0.2; % Air Density [kg/m3]
 
+%% Engine Configuration
 T_Engine_max= 115; % Engine Maximum Torque [Nm]
-  
 V_d=1.497/1000; % Engine Displacment [m3]
-  
 e=0.4; % Willans approximation of engine efficiency
-  
 p_me0=0.1; % Willans approximation of engine pressure [MPa]
-  
+
+%% Battery Configuration
 Q_o=6.5; % Battery charging capacity [Ah]
-  
 U_oc=300; % Open circuit voltage [V]
-  
 Imax= 200; % Maximum dis-/charging current [A]
-  
 Imin=-200; % Maximum dis-/charging current [A]
-  
 Ri= 0.65; % Inner resistance [ohm]
-  
+
+%% Motor and Generator Configuration
 eta_motor=0.9; % Efficiency of electrical machine
-  
 T_mech_max=400; %Nm
-  
 Pmech_max=50000; % W
-  
 Pmech_min=-50000; % W
   
+%% Logitudinal Vehicle Model Parameters
 cD=0.32; % Drag coefficient
-  
 cR=0.015; % Rolling resistance coefficient
-  
 Af=2.31; % Frontal area [m2]
-  
 m= 1500; % Vehicle mass [kg]
-  
 rw=0.3; % Wheel radius [m]
   
 Jw=0.6; % Inertia of the wheels [kgm2]
@@ -139,11 +129,11 @@ x=((p_me0*1000000*V_d)/(4*pi));
 costVector=(Average_angular_velocity_engine./(e*H_l)).*(Torque_engine+x+(J_e*Average_angular_acceleration_engine));        % Fuel Consumption for given t_vec
  
 % Additional Constraints
-costVector((Ne_start==0 & Ne_final>800))=inf;%
-costVector(Power_gen>50000)=inf;%
-costVector(Ne_start==0 & Torque_engine>0)=inf;%
-costVector(Average_angular_acceleration_engine>300)=inf;%
-costVector(costVector<0)=0;%
-costVector(I_batt>200 | I_batt<-200)=inf;%
+costVector((Ne_start==0 & Ne_final>800))=inf;
+costVector(Power_gen>50000)=inf;
+costVector(Ne_start==0 & Torque_engine>0)=inf;
+costVector(Average_angular_acceleration_engine>300)=inf;
+costVector(costVector<0)=0;
+costVector(I_batt>Imax | I_batt<Imin)=inf;
 costVector(Torque_engine>T_Engine_max)=inf;%
-costVector(Torque_gen>400)=inf;
+costVector(Torque_gen>T_mech_max)=inf;

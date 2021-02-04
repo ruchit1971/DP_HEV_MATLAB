@@ -11,7 +11,6 @@ function [costVector]=parallelHybrid(t_vec,SOC_start,SOC_final);
 %
 % Output:
 % costVector - Vector with the costs for all arcs from SOC_start.
-% Version 1.0, 2008-06-30 Lars Eriksson
 % Implement your parallel hybrid model and calculate the arc costs below.
 
 % Global Variable
@@ -65,9 +64,9 @@ mwheel=Jw/(rw^2); % Rotating Mass [kg]
 eta_gearbox=0.98; % Efficiency of Transmission
 P_pt_max=90.8; % Maximum powertrain power [kW]
 
-%% Range
+%% Velocity and Aceelration Engien Range
 N_e= 0:800:5000; % Engine RPM range
-w_e= 300; % [rad/s2] % Maximum accelration of the engine
+w_dot_e= 300; % [rad/s2] % Maximum accelration of the engine
 
 
 %-----------------------Cost Vector Calculations--------------------------%
